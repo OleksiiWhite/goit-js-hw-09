@@ -1,7 +1,26 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-const TIMER_DEADLINE = new Date(2022, 8, 26, 21, 35);
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
-const timerRef = document.querySelector('.timer__items');
+// let dateSelected = null;
+
+// const options = {
+//   enableTime: true,
+//   time_24hr: true,
+//   defaultDate: new Date(),
+//   minuteIncrement: 1,
+//   time_24hr: true,
+//   dateSelected: selectedDates[0],
+//   onClose(selectedDates) {
+//     console.log(dateSelected);
+//   },
+// };
+
+// flatpickr(selector, options);
+
+const TIMER_DEADLINE = flatpickr();
+
+const timerRef = document.querySelector('.timer');
 
 const timer = {
   intervalId: null,
