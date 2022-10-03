@@ -2,21 +2,21 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-// let dateSelected = null;
+let dateSelected = null;
 
-// const options = {
-//   enableTime: true,
-//   time_24hr: true,
-//   defaultDate: new Date(),
-//   minuteIncrement: 1,
-//   time_24hr: true,
-//   dateSelected: selectedDates[0],
-//   onClose(selectedDates) {
-//     console.log(dateSelected);
-//   },
-// };
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  time_24hr: true,
+  dateSelected: selectedDates[0],
+  onClose(selectedDates) {
+    console.log(dateSelected);
+  },
+};
 
-// flatpickr(selector, options);
+flatpickr('#datetime - picker', options);
 
 const TIMER_DEADLINE = flatpickr();
 
