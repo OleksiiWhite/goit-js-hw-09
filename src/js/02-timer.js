@@ -1,105 +1,77 @@
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import Notiflix from 'notiflix';
+import 'notiflix/dist/notiflix-3.2.5.min.css';
 
-let dateSelected = null;
+const startBtn = document.querySelector('button[data-start]');
+const dateChosen = document.querySelector('#datetime-picker');
+const d = document.querySelector('[data-days]');
+const h = document.querySelector('[data-hours]');
+const m = document.querySelector('[data-minutes]');
+const s = document.querySelector('[data-seconds]');
+
+let timer = null;
+
+startBtn.disabled = true;
 
 const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
-  time_24hr: true,
-  dateSelected: selectedDates[0],
-  onClose(selectedDates) {
-    console.log(dateSelected);
-  },
-};
+  onClose(selectedDate) {
+    if (selectedDate[0] <= new Date()) {
+      startBtn.disabled = true;
+      Notiflix.Notify.failure('Please choose a date in the future');
+    } else {
+      startBtn.disabled = false;
 
-flatpickr('#datetime - picker', options);
+      startBtn.addEventListener('click', countdownTime);
 
-const TIMER_DEADLINE = flatpickr();
+      function countdownTime() {
+        timer = setInterval(() => {
+          startBtn.disabled = true;
 
-const timerRef = document.querySelector('.timer');
+          const dateChoosenMs = new Date(
+            dateChosen.value.replace(/-/g, '/')
+          ).getTime();
+          const now = new Date().getTime();
+          const timeLeft = dateChoosenMs - now;
 
-const timer = {
-  intervalId: null,
-  refs: {},
-  notifyOptions: {
-    position: 'center-center',
-    backOverlay: true,
-    clickToClose: true,
-    closeButton: true,
-  },
-  start(rootSelector, deadline) {
-    const delta = deadline.getTime() - Date.now();
-    if (delta <= 0) {
-      Notify.failure(
-        'Вибраний час в минулому, виберіть дату в майбутньому!',
-        this.notifyOptions
-      );
-      return;
-    }
-    Notify.success('Відлік почався', this.notifyOptions);
-    this.getRefs(rootSelector);
-    this.intervalId = setInterval(() => {
-      const diff = deadline.getTime() - Date.now();
+          const { days, hours, minutes, seconds } = convertMs(timeLeft);
 
-      if (diff <= 1000) {
-        clearInterval(this.intervalId);
-        Notify.success('Дедлайн настав!', this.notifyOptions);
+          d.innerHTML = days < 10 ? addLeadingZero(days) : days;
+          h.innerHTML = hours < 10 ? addLeadingZero(hours) : hours;
+          m.innerHTML = minutes < 10 ? addLeadingZero(minutes) : minutes;
+          s.innerHTML = seconds < 10 ? addLeadingZero(seconds) : seconds;
+
+          if (timeLeft < 1000) {
+            clearInterval(timer);
+            startBtn.disabled = false;
+          }
+        }, 1000);
       }
 
-      const data = this.convertMs(diff);
-      //   Object.entries(data).forEach(([name, value]) => {
-      //     this.refs[name].textContent = this.addLeadinZero(value);
-      //   });
-      this.refs.days.textContent = this.addLeadinZero(data.days);
-      this.refs.hours.textContent = this.addLeadinZero(data.hours);
-      this.refs.minutes.textContent = this.addLeadinZero(data.minutes);
-      this.refs.seconds.textContent = this.addLeadinZero(data.seconds);
-    }, 1000);
-  },
+      function addLeadingZero(value) {
+        const stringValue = String(value);
+        return stringValue.padStart(2, '0');
+      }
 
-  getRefs(rootSelector) {
-    // [...rootSelector.children].forEach(item => {
-    //   const { title } = item.dataset;
-    //   this.refs[title] = item;
-    // });
-    this.refs.days = rootSelector.querySelector('.js-timer__days');
-    this.refs.hours = rootSelector.querySelector('.js-timer__hours');
-    this.refs.minutes = rootSelector.querySelector('.js-timer__minutes');
-    this.refs.seconds = rootSelector.querySelector('.js-timer__seconds');
-  },
-  convertMs(diff) {
-    const days = Math.floor(diff / 1000 / 60 / 60 / 24);
-    const hours = Math.floor(diff / 1000 / 60 / 60) % 24;
-    const minutes = Math.floor(diff / 1000 / 60) % 60;
-    const seconds = Math.floor(diff / 1000) % 60;
-    return { days, hours, minutes, seconds };
-  },
-  addLeadinZero(value) {
-    return String(value).padStart(2, '0');
+      function convertMs(ms) {
+        const second = 1000;
+        const minute = second * 60;
+        const hour = minute * 60;
+        const day = hour * 24;
+
+        const days = Math.floor(ms / day);
+        const hours = Math.floor((ms % day) / hour);
+        const minutes = Math.floor(((ms % day) % hour) / minute);
+        const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+
+        return { days, hours, minutes, seconds };
+      }
+    }
   },
 };
 
-// timer.start(timerRef, TIMER_DEADLINE);
-console.log(new Date('2030-03-16'));
-console.log(new Date('2030-03'));
-console.log(new Date('2018'));
-
-const interval1 = setInterval(function () {
-  // body
-}, 1000);
-
-const interval2 = setInterval(function () {
-  // body
-}, 1000);
-
-const interval3 = setInterval(function () {
-  // body
-}, 1000);
-
-console.log(interval1);
-console.log(interval3);
-console.log(interval2);
+flatpickr(dateChosen, options);
